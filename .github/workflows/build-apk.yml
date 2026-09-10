@@ -1,0 +1,37 @@
+name: Build Portable Launcher
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v6
+
+      - name: Extrair projeto
+        run: |
+          unzip -o portable-launcher-github-ready.zip
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Criar Gradle Wrapper
+        working-directory: portable-launcher/android
+        run: gradle wrapper --gradle-version 8.9
+
+      - name: Compilar APK
+        working-directory: portable-launcher/android
+        run: ./gradlew assembleDebug
+
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: portable-launcher-apk
+          path: portable-launcher/android/app/build/outputs/apk/debug/app-debug.apk
